@@ -1,7 +1,7 @@
 Action:
-    icon: https://docs.nasdanika.org/images/nasdanika-logo.png
-    text: Nasdanika Templates
-    location: https://github.com/Nasdanika-Templates
+    icon: https://docs.nasdanika.org/images/nasdanika-knowledge.png
+    text: Nasdanika Knowledge
+    location: https://github.com/Nasdanika-Knowledge
     children:
       - Action:
           location: ${base-uri}search.html
