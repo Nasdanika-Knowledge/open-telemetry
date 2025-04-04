@@ -29,6 +29,7 @@ Metric instruments are used to collect measurements.
 ## Javadoc
 
 * [API](https://javadoc.io/doc/io.opentelemetry/opentelemetry-api)
+* [Context](https://javadoc.io/doc/io.opentelemetry/opentelemetry-context)
 * [SDK](https://javadoc.io/doc/io.opentelemetry/opentelemetry-sdk) - for programmatic configuration
 
 ## Site generation

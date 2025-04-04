@@ -76,7 +76,32 @@ Method installMethod = openTelemetryAppenderClass.getMethod("install", OpenTelem
 installMethod.invoke(null, openTelemetry);				
 ```
 
+Below is an example of a ``logback.xml`` file configured for reporting logs to OpenTelemetry:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<appender name="file" class="ch.qos.logback.core.FileAppender">
+	    <file>nsd.log</file>
+	    <append>true</append>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg %kvp{DOUBLE}%n</pattern>
+        </encoder>
+	</appender>    
+    <appender name="OpenTelemetry"
+              class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+        <captureExperimentalAttributes>true</captureExperimentalAttributes>
+        <captureKeyValuePairAttributes>true</captureKeyValuePairAttributes>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="file"/>
+        <appender-ref ref="OpenTelemetry"/>
+    </root>
+</configuration>
+```
+
 ## Nasdanika Core Telemetry
 
-With [Nadanika Core Telemetry](https://docs.nasdanika.org/core/telemetry/index.html) module you can obtain an instance of OpenTelemetry as a service using the [Nasdanika Capability Framework](https://docs.nasdanika.org/core/capability/index.html).
+With [Nadanika Core Telemetry](https://docs.nasdanika.org/core/telemetry/index.html) module you can obtain an instance of 
+OpenTelemetry as a service using the [Nasdanika Capability Framework](https://docs.nasdanika.org/core/capability/index.html).
 The telemetry module takes care of initializing log bridging just once and also has all the above dependencies in its ``pom.xml``, so you'd need to add just one dependency.
