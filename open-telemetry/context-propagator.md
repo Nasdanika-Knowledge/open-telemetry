@@ -87,25 +87,19 @@ public Mono<HttpResponse> process(HttpPipelineCallContext context, HttpPipelineN
 		
 		return 
 			result
-				.map(response -> {
-			        try (Scope scope = requestSpan.makeCurrent()) {
-			        	double duration = System.currentTimeMillis() - start;
-			        	durationHistogram.record(duration / 1000);
-						requestSpan.setAttribute("http.status", response.getStatusCode());
+				.map(result -> {
+			        	if (durationConsumer != null) {
+						durationConsumer.accept(request.method().name() + " " + request.uri(), System.currentTimeMillis() - start);
+		        		}
 			        	requestSpan.setStatus(StatusCode.OK);
-						return response;
-			        }
-				})
+					return result;
+					})
 				.onErrorMap(error -> {
-			        try (Scope scope = requestSpan.makeCurrent()) {
-				        logger.error("Request failed: " + request.getHttpMethod() + " " + request.getUrl() , error);
+	        			requestSpan.recordException(error);
 			        	requestSpan.setStatus(StatusCode.ERROR);
-						return error;
-			        }
-				}).doFinally(signal -> {
-					requestSpan.setAttribute("response.thread", Thread.currentThread().getName());
-		        	requestSpan.end();					
-				});
+					return error;
+				})
+				.doFinally(signal -> requestSpan.end());				
 	});
 }
 ```
@@ -126,7 +120,7 @@ propagator.inject(telemetryContext, request, (rq, name, value) -> rq.setHeader(H
 ### Extraction
 
 ```java
-TextMapGetter<HttpServerRequest> mapper = new ExtendedTextMapGetter<HttpServerReguest>() { 
+TextMapGetter<HttpServerRequest> mapper = new TextMapGetter<HttpServerRequest>() { 
 
     @Override
     public Iterable<String> keys(HttpServerRequest carrier) {
@@ -138,11 +132,11 @@ TextMapGetter<HttpServerRequest> mapper = new ExtendedTextMapGetter<HttpServerRe
     }
     
     @Override
-    public String get(HttpServerRequest carrier, String Key) {
-    	HttpHeaders headers = carrier.requestHeaders());
+    public String get(HttpServerRequest carrier, String key) {
+    	HttpHeaders headers = carrier.requestHeaders();
     	return StreamSupport
     		.stream(headers.spliterator() , false)
-    		.filter(e -> Objects.equals(e.getKey() , key)
+    		.filter(e -> Objects.equals(e.getKey() , key))
     		.map(Entry::getValue)
     		.findAny()
     		.orElse(null);
