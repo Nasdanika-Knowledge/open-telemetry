@@ -110,6 +110,47 @@ Please note that the above code also propagates the request span context downstr
 
 ### Injection
 
+#### Reactor Netty Client
+
+```java
+OpenTelemetry openTelemetry = ...;
+Tracer tracer = openTelemetry.getTracer(...);
+Span span = TelemetryUtil.buildSpan(tracer.spanBuilder(...))
+	.setSpanKind(SpanKind.CLIENT)
+	.startSpan();
+
+TextMapPropagator propagator = openTelemetry.getPropagators().getTextMapPropagator();
+
+try (Scope scope = span.makeCurrent()) {			
+	HttpClient client = HttpClient.create()
+			.headers(headerBuilder -> {
+				propagator.inject(Context.current(), headerBuilder, (c, k, v) -> c.set(k,v));	
+			})
+			.followRedirect(true);
+	
+	String response = client.get()
+		.uri("...")			
+		.responseContent()
+		.aggregate()
+		.asString()
+		.map(result -> {
+			span.setStatus(StatusCode.OK);
+			return result;
+		})
+		.onErrorMap(error -> {
+			span.recordException(error);
+			span.setStatus(StatusCode.ERROR);
+			return error;
+		})
+		.doFinally(signal -> span.end())
+		.block();
+	
+	System.out.println(response);
+}
+```
+
+#### Java HTTP Client
+
 ```java
 TextMapPropagator propagator = openTelemetry.getPropagators().getTextMapPropagator();
 ...
