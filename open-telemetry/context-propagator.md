@@ -154,8 +154,10 @@ try (Scope scope = span.makeCurrent()) {
 ```java
 TextMapPropagator propagator = openTelemetry.getPropagators().getTextMapPropagator();
 ...
+HttpRequest.Builder builder = ...
 Context telemetryContext = Context.current().with(requestSpan);
-propagator.inject(telemetryContext, request, (rq, name, value) -> rq.setHeader(HttpHeaderName.fromString(name), value));
+propagator.inject(telemetryContext, builder, (b, name, value) -> b.header(name, value));
+
 ```
 
 ### Extraction

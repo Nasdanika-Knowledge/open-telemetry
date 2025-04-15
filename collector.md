@@ -1,5 +1,7 @@
 [Collector](https://opentelemetry.io/docs/collector/) receives, processes, and exports telemetry data.
 
+## Container image in GCP Cloud 
+
 One way to quickly start with OpenTelemetry is to run a collector with a front end as a Docker container.
 
 The below instructions explain how to start an OpenTelemetry collector with [Grafana](https://grafana.com/oss/opentelemetry/) in [Google Cloud](https://cloud.google.com/):
@@ -18,4 +20,9 @@ The below instructions explain how to start an OpenTelemetry collector with [Gra
     *   ``podman start <container name or ID>``
 * In your auto-configured Java applications add ``-Dotel.java.global-autoconfigure.enabled=true -Dotel.metrics.exporter=otlp -Dotel.logs.exporter=otlp -Dotel.traces.exporter=otlp -Dotel.exporter.otlp.endpoint=http://<VM external IP>:4317 -Dotel.service.name=<service name>`` properties to the command line. You can also use environment variables. See [Environment variables and system properties](https://opentelemetry.io/docs/languages/java/configuration/#environment-variables-and-system-properties) for more details.   
 * Open ``http://<VM external IP>:3000`` in a web browser
+
+## Grafana Cloud
+
+Another option, out of many, is to use [Grafana Cloud](https://grafana.com/products/cloud). 
+You would have to install [Grafana Alloy](https://grafana.com/oss/alloy-opentelemetry-collector/) on your machine.
 
